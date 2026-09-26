@@ -1,0 +1,14 @@
+{
+  "name": "piano-autoplay",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node src/main.ts",
+    "test": "node --test \"test/*.test.ts\"",
+    "smoke": "node scripts/smoke.ts"
+  },
+  "dependencies": {
+    "playwright": "1.58.2"
+  }
+}
