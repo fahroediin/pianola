@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parse } from '../src/notation.ts';
+import { parse, formatError } from '../src/notation.ts';
 import { schedule } from '../src/schedule.ts';
 
 // tempo 60 => 1 beat = 1000 ms, so expected times stay readable
@@ -85,4 +85,29 @@ test('a delayed very short note is still held at least 20 ms', () => {
     [60, 'up', '8'],
     [970, 'up', 'T'],
   ]);
+});
+
+function clashes(body: string) {
+  const parsed = parse('tempo: 60\n' + body);
+  assert.deepEqual(parsed.errors, []);
+  const result = schedule(parsed.song);
+  return { actions: result.actions, errors: result.errors.map(formatError) };
+}
+
+test('C4 and C#4 overlapping share key t', () => {
+  assert.deepEqual(clashes('RH: C4:2\nLH: R C#4'), {
+    actions: [],
+    errors: ['baris 3: bentrok tombol: C4 (baris 2) dan C#4 (baris 3) memakai tombol yang sama pada waktu bersamaan'],
+  });
+});
+
+test('same note in both hands at the same time', () => {
+  assert.deepEqual(clashes('RH: E4\nLH: E4').errors, [
+    'baris 3: bentrok tombol: E4 (baris 2) dan E4 (baris 3) memakai tombol yang sama pada waktu bersamaan',
+  ]);
+});
+
+test('back-to-back notes on the same key do not clash', () => {
+  assert.deepEqual(clashes('RH: C4 C#4').errors, []);
+  assert.deepEqual(clashes('RH: C4\n\nLH: C#4').errors, []);
 });

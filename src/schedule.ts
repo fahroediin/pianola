@@ -21,7 +21,30 @@ interface Sounding {
 const round = (ms: number) => Math.round(ms * 1000) / 1000;
 
 export function schedule(song: Song, speed = 1): ScheduleResult {
-  return { actions: toActions(layout(song, speed)), errors: [] };
+  const soundings = layout(song, speed);
+  const errors = findKeyClashes(soundings);
+  if (errors.length > 0) return { actions: [], errors };
+  return { actions: toActions(soundings), errors: [] };
+}
+
+function findKeyClashes(soundings: Sounding[]): SongError[] {
+  const errors: SongError[] = [];
+  const byKey = new Map<string, Sounding[]>();
+  for (const s of soundings) byKey.set(s.key, [...(byKey.get(s.key) ?? []), s]);
+  for (const list of byKey.values()) {
+    list.sort((a, b) => a.start - b.start);
+    let holder = list[0];
+    for (const s of list.slice(1)) {
+      if (s.start < holder.end) {
+        errors.push({
+          line: s.line,
+          message: `bentrok tombol: ${holder.note} (baris ${holder.line}) dan ${s.note} (baris ${s.line}) memakai tombol yang sama pada waktu bersamaan`,
+        });
+      }
+      if (s.end > holder.end) holder = s;
+    }
+  }
+  return errors.sort((a, b) => a.line - b.line);
 }
 
 function layout(song: Song, speed: number): Sounding[] {
