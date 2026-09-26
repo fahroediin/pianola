@@ -58,11 +58,35 @@ function releaseAt(s: Sounding): number {
 
 function toActions(soundings: Sounding[]): Action[] {
   const actions: Action[] = [];
-  for (const s of soundings) {
-    s.down = s.start;
-    actions.push({ at: s.down, type: 'down', key: s.key });
+  const pressKey = (s: Sounding) => (s.shift ? s.key.toUpperCase() : s.key);
+
+  // Unity samples Shift once per frame at key press: naturals go first, sharps get Shift held SHIFT_HOLD_MS.
+  const byStart = [...soundings].sort((a, b) => a.start - b.start || Number(a.shift) - Number(b.shift));
+  let shiftHeld = false;
+  let shiftUpAt = 0;
+  for (const s of byStart) {
+    let at = s.start;
+    if (s.shift) {
+      if (shiftHeld && at > shiftUpAt) {
+        actions.push({ at: shiftUpAt, type: 'up', key: 'Shift' });
+        shiftHeld = false;
+      }
+      if (!shiftHeld) {
+        actions.push({ at, type: 'down', key: 'Shift' });
+        shiftHeld = true;
+      }
+      shiftUpAt = at + SHIFT_HOLD_MS;
+    } else if (shiftHeld) {
+      if (at < shiftUpAt) at = shiftUpAt;
+      actions.push({ at: shiftUpAt, type: 'up', key: 'Shift' });
+      shiftHeld = false;
+    }
+    s.down = at;
+    actions.push({ at, type: 'down', key: pressKey(s) });
   }
-  for (const s of soundings) actions.push({ at: releaseAt(s), type: 'up', key: s.key });
+  if (shiftHeld) actions.push({ at: shiftUpAt, type: 'up', key: 'Shift' });
+
+  for (const s of soundings) actions.push({ at: releaseAt(s), type: 'up', key: pressKey(s) });
   return sortActions(actions);
 }
 

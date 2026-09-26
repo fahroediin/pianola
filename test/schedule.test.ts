@@ -43,3 +43,46 @@ test('tracks in a block run in parallel; next block waits for the longest track'
 test('speed multiplies the tempo', () => {
   assert.deepEqual(rows('RH: C4 D4', 2), [[0, 'down', 't'], [470, 'up', 't'], [500, 'down', 'y'], [970, 'up', 'y']]);
 });
+
+test('mixed chord: natural first, then Shift + sharp, Shift released after 40 ms', () => {
+  assert.deepEqual(rows('RH: [C#4 E4]'), [
+    [0, 'down', 'u'], [0, 'down', 'Shift'], [0, 'down', 'T'],
+    [40, 'up', 'Shift'],
+    [970, 'up', 'T'], [970, 'up', 'u'],
+  ]);
+});
+
+test('natural inside the Shift window is delayed until Shift is up', () => {
+  assert.deepEqual(rows('RH: C#4\nLH: R:0.02 C3'), [
+    [0, 'down', 'Shift'], [0, 'down', 'T'],
+    [40, 'up', 'Shift'], [40, 'down', '8'],
+    [970, 'up', 'T'], [990, 'up', '8'],
+  ]);
+});
+
+test('sharp inside the Shift window reuses Shift and extends it', () => {
+  assert.deepEqual(rows('RH: C#4\nLH: R:0.02 D#3'), [
+    [0, 'down', 'Shift'], [0, 'down', 'T'],
+    [20, 'down', '9'],
+    [60, 'up', 'Shift'],
+    [970, 'up', 'T'], [990, 'up', '9'],
+  ]);
+});
+
+test('sharps far apart get separate Shift presses', () => {
+  assert.deepEqual(rows('RH: C#4 D#4'), [
+    [0, 'down', 'Shift'], [0, 'down', 'T'], [40, 'up', 'Shift'],
+    [970, 'up', 'T'],
+    [1000, 'down', 'Shift'], [1000, 'down', 'Y'], [1040, 'up', 'Shift'],
+    [1970, 'up', 'Y'],
+  ]);
+});
+
+test('a delayed very short note is still held at least 20 ms', () => {
+  assert.deepEqual(rows('RH: C#4\nLH: R:0.02 C3:0.01'), [
+    [0, 'down', 'Shift'], [0, 'down', 'T'],
+    [40, 'up', 'Shift'], [40, 'down', '8'],
+    [60, 'up', '8'],
+    [970, 'up', 'T'],
+  ]);
+});
