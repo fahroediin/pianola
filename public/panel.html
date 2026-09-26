@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piano Autoplay</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px; color: #1d1d1f; background: #fafafa; }
+  textarea { width: 100%; box-sizing: border-box; height: 360px; font: 14px/1.5 ui-monospace, Consolas, monospace; padding: 8px; }
+  .row { display: flex; gap: 12px; align-items: center; margin: 12px 0; flex-wrap: wrap; }
+  button { padding: 8px 20px; font-size: 15px; cursor: pointer; }
+  #status { font-weight: 600; }
+  #errors { color: #b00020; font: 13px/1.5 ui-monospace, Consolas, monospace; padding-left: 20px; }
+</style>
+</head>
+<body>
+<h1>Piano Autoplay</h1>
+<textarea id="text" spellcheck="false" placeholder="tempo: 90&#10;RH: C4 D4 E4&#10;LH: C3:3"></textarea>
+<div class="row">
+  <label>Kecepatan <input id="speed" type="range" min="50" max="200" step="5" value="100"> <span id="speedLabel">100%</span></label>
+  <button id="play">Play</button>
+  <button id="stop">Stop</button>
+  <span id="status"></span>
+</div>
+<ul id="errors"></ul>
+<script>
+const $ = (id) => document.getElementById(id);
+const LABELS = { loading: 'Memuat piano...', ready: 'Siap', playing: 'Memainkan...', done: 'Selesai', stopped: 'Berhenti', error: 'Error' };
+const STORE_KEY = 'piano-autoplay:text';
+
+try { $('text').value = localStorage.getItem(STORE_KEY) ?? ''; } catch {}
+$('text').addEventListener('input', () => { try { localStorage.setItem(STORE_KEY, $('text').value); } catch {} });
+$('speed').addEventListener('input', () => { $('speedLabel').textContent = $('speed').value + '%'; });
+
+function showErrors(list) {
+  $('errors').replaceChildren(...list.map((m) => { const li = document.createElement('li'); li.textContent = m; return li; }));
+}
+
+// After Play, keep polling through 'loading'/'ready' until the run finishes.
+let pollTimer = null;
+async function refreshStatus(untilFinished = false) {
+  clearTimeout(pollTimer);
+  try {
+    const s = await (await fetch('/status')).json();
+    $('status').textContent = LABELS[s.state] + (s.message ? ': ' + s.message : '');
+    const settled = untilFinished ? ['done', 'stopped', 'error'] : ['ready', 'done', 'stopped', 'error'];
+    if (!settled.includes(s.state)) pollTimer = setTimeout(() => refreshStatus(untilFinished), 500);
+  } catch {
+    $('status').textContent = 'Server tidak terhubung';
+  }
+}
+
+$('play').addEventListener('click', async () => {
+  showErrors([]);
+  const res = await fetch('/play', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ text: $('text').value, speed: Number($('speed').value) / 100 }),
+  });
+  const body = await res.json();
+  if (!res.ok) { showErrors(body.errors ?? ['Gagal memulai']); return; }
+  refreshStatus(true);
+});
+
+$('stop').addEventListener('click', async () => {
+  await fetch('/stop', { method: 'POST' });
+  refreshStatus();
+});
+
+refreshStatus();
+</script>
+</body>
+</html>
