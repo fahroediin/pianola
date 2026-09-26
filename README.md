@@ -107,6 +107,7 @@ yang ditolak.
 |---|---|
 | `songs/ode-to-joy.txt` | Ode to Joy, Beethoven (domain publik) |
 | `songs/twinkle.txt` | Twinkle Twinkle Little Star (domain publik) |
+| `songs/fur-elise.txt` | Für Elise, Beethoven (domain publik) |
 | `songs/uji-kres.txt` | Uji akord campuran kres + natural dan tangga nada kromatik |
 
 ## Pengujian
