@@ -1,0 +1,8 @@
+tempo: 80
+# Uji manual aturan Shift: akord campuran kres + natural, lalu tangga nada kromatik.
+# Yang diharapkan terlihat: tiap akord menyalakan 3 tuts sekaligus, lalu 12 tuts berurutan naik.
+
+RH: [C#4 E4 G#4]:2 [D4 F#4 A4]:2 [E4 G#4 B4]:2
+LH: A2:2 B2:2 E3:2
+
+RH: C4:0.5 C#4:0.5 D4:0.5 D#4:0.5 E4:0.5 F4:0.5 F#4:0.5 G4:0.5 G#4:0.5 A4:0.5 A#4:0.5 B4:0.5 C5:2
