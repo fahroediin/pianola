@@ -47,8 +47,10 @@ LH: A2:0.5 E3:0.5 A3:0.5 C4:0.5 E4:3
 Aturan:
 - `tempo: N`: BPM, opsional, default 90. Rentang 20-300. Hanya boleh muncul satu kali, sebelum
   blok pertama.
-- `#` sampai akhir baris adalah komentar.
-- **Blok** = kelompok baris tidak kosong yang dipisahkan satu atau lebih baris kosong. Tiap baris
+- `#` sampai akhir baris adalah komentar. Baris yang hanya berisi komentar diabaikan seluruhnya:
+  bukan isi blok dan bukan pemisah blok.
+- **Blok** = kelompok baris tidak kosong yang dipisahkan satu atau lebih baris kosong (hanya
+  spasi/tab). Tiap baris
   di blok diawali label `RH:` atau `LH:`. Tiap label paling banyak sekali per blok. Blok boleh
   hanya berisi satu jalur.
 - Jalur-jalur dalam satu blok mulai bersamaan. Blok berikutnya mulai setelah jalur terpanjang di
