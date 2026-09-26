@@ -1,4 +1,4 @@
-# Piano Autoplay: Design Spec
+# Pianola: Design Spec
 
 Tanggal: 2026-09-26
 Status: menunggu review
