@@ -47,7 +47,9 @@ LH: A2:0.5 E3:0.5 A3:0.5 C4:0.5 E4:3
 Aturan:
 - `tempo: N`: BPM, opsional, default 90. Rentang 20-300. Hanya boleh muncul satu kali, sebelum
   blok pertama.
-- `#` sampai akhir baris adalah komentar. Baris yang hanya berisi komentar diabaikan seluruhnya:
+- `#` yang berada di awal baris atau didahului spasi, sampai akhir baris, adalah komentar. `#`
+  yang menempel pada huruf not (`C#4`) adalah tanda kres, bukan komentar. Baris yang hanya berisi
+  komentar diabaikan seluruhnya:
   bukan isi blok dan bukan pemisah blok.
 - **Blok** = kelompok baris tidak kosong yang dipisahkan satu atau lebih baris kosong (hanya
   spasi/tab). Tiap baris
@@ -108,8 +110,10 @@ piano-autoplay/
   src/notation.ts       parse(text) -> { song, errors[] }
   src/schedule.ts       schedule(song, speed) -> { actions: Action[], errors[] }; errors = bentrok tombol
   src/player.ts         Playwright: buka situs, load piano, fokus, jalankan aksi, stop
-  src/server.ts         HTTP (node:http): panel + API
+  src/server.ts         HTTP (node:http): panel + API; menerima Player lewat parameter (bisa dites)
+  src/main.ts           titik masuk: buat PianoPlayer, jalankan server
   public/panel.html     UI
+  scripts/smoke.ts      uji manual player tanpa panel
   songs/                contoh domain publik: ode-to-joy.txt, twinkle.txt
   test/                 node:test untuk keymap, notation, schedule
 ```
