@@ -97,6 +97,11 @@ tombol natural huruf kecil/angka, atau `Shift`.
    - `up` tidak terpengaruh Shift.
 3. Aksi `up` yang mundur ke sebelum `down`-nya (not sangat pendek) dipaksa minimal
    `down + 20 ms`.
+4. **Batas frame di player** (ditambahkan setelah verifikasi audio 2026-09-26). Jeda milidetik
+   saja tidak menjamin Unity melihat natural dan Shift di frame berbeda: dengan jeda 40 ms saja,
+   hanya 16 dari 32 not akord campuran yang benar. Player menunggu halaman merender frame baru
+   (dua `requestAnimationFrame`) sebelum setiap `Shift down`/`Shift up` bila ada tombol yang
+   ditekan sejak frame terakhir. Hasil setelahnya: 225 not dari 6 run, 0 nada salah.
 
 ## 5. Komponen
 
